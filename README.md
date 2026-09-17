@@ -20,12 +20,14 @@ This application was iteratively developed to reduce cognitive load and provide 
 
 ## Technical Stack
 
-* **Frontend Framework:** React (Vite)
+* **Frontend Framework:** React 18 (Vite 5)
+* **Testing:** Vitest & React Testing Library (30 automated tests)
 * **Styling:** Tailwind CSS (v3)
 * **Icons:** Lucide React
 * **Deployment Architecture:** Progressive Web App (PWA) via `vite-plugin-pwa`
+* **Live Deployment:** [https://frs-calculator.surge.sh](https://frs-calculator.surge.sh)
 
-## Local Development &amp; Deployment
+## Local Development & Testing
 
 1. **Clone and Install:**
    ```bash
@@ -37,11 +39,25 @@ This application was iteratively developed to reduce cognitive load and provide 
    npm run dev
    ```
 
-3. **Build for Production:**
+3. **Run Automated Test Suite:**
+   ```bash
+   npm test
+   # Or run with watcher:
+   npm run test:watch
+   ```
+
+4. **Continuous Auto-Rebuild:**
+   ```bash
+   npm run build:watch
+   ```
+   *Automatically recompiles `/dist` in real-time upon any file alteration.*
+
+5. **Build for Production & Deploy:**
    ```bash
    npm run build
+   npm run deploy
    ```
-   *The resulting `/dist` directory contains the fully packaged, offline-capable PWA, ready to be deployed to any static hosting environment (Vercel, Netlify, Cloudflare Pages).*
+   *Deploys the production bundle to `frs-calculator.surge.sh`.*
 
 ## Disclaimer
 

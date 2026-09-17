@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -33,5 +34,21 @@ export default defineConfig({
         ],
       },
     }),
+    {
+      name: 'generate-200-html',
+      closeBundle() {
+        try {
+          if (fs.existsSync('dist/index.html')) {
+            fs.copyFileSync('dist/index.html', 'dist/200.html');
+          }
+        } catch (err) {
+          console.error('Failed to copy 200.html:', err);
+        }
+      },
+    },
   ],
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+  },
 });
