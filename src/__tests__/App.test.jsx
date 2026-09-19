@@ -1,3 +1,4 @@
+import 'fake-indexeddb/auto';
 import React from "react";
 import { describe, it, expect } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
@@ -140,8 +141,23 @@ describe("App Integration Tests", () => {
 
     // Look for Action buttons
     expect(screen.getByRole("button", { name: /Email Proposal/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Save Record/i })).toBeDefined();
     expect(screen.getByRole("button", { name: /Download PDF/i })).toBeDefined();
     expect(screen.getByRole("button", { name: /Print/i })).toBeDefined();
+  });
+
+  it("opens the Saved Clients modal and displays local database tools", () => {
+    render(<App />);
+
+    const savedClientsBtn = screen.getByRole("button", { name: /Saved Clients/i });
+    expect(savedClientsBtn).toBeDefined();
+    fireEvent.click(savedClientsBtn);
+
+    expect(screen.getByText(/Saved Client Consultations/i)).toBeDefined();
+    expect(screen.getByText(/Local-first IndexedDB storage/i)).toBeDefined();
+    expect(screen.getByPlaceholderText(/Search saved clients/i)).toBeDefined();
+    expect(screen.getByRole("button", { name: /Export Local Backup/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Restore Backup/i })).toBeDefined();
   });
 });
 

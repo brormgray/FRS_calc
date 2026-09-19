@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, Download, Share2, Mail, Printer, UserCheck, ShieldCheck, Check, Loader2 } from "lucide-react";
+import { X, Download, Share2, Mail, Printer, UserCheck, ShieldCheck, Check, Loader2, BookmarkCheck } from "lucide-react";
 import OnePageReport from "./OnePageReport.jsx";
 import { generateReportPdfBlob, shareOrEmailReport, createMailtoUrl } from "../utils/pdfExport.js";
-import { ADVISOR_STORAGE_KEY, DEFAULT_ADVISOR_INFO } from "../constants/pension.js";
+import { DEFAULT_ADVISOR_INFO } from "../constants/pension.js";
+import { getAdvisorProfile, saveAdvisorProfile, saveConsultation } from "../db/index.js";
 
 export default function ReportModal({
   isOpen,
@@ -12,36 +13,57 @@ export default function ReportModal({
   onUpdateFormData,
 }) {
   const reportRef = useRef(null);
-  const [advisorInfo, setAdvisorInfo] = useState(() => {
-    try {
-      if (typeof window !== "undefined" && window.localStorage) {
-        const saved = window.localStorage.getItem(ADVISOR_STORAGE_KEY);
-        return saved ? { ...DEFAULT_ADVISOR_INFO, ...JSON.parse(saved) } : DEFAULT_ADVISOR_INFO;
-      }
-    } catch {
-      // fallback
-    }
-    return DEFAULT_ADVISOR_INFO;
-  });
-
+  const [advisorInfo, setAdvisorInfo] = useState(DEFAULT_ADVISOR_INFO);
   const [showAdvisorEdit, setShowAdvisorEdit] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState("");
 
-  // Save advisor info changes to localStorage
+  // Load advisor profile from local DexieDB
+  useEffect(() => {
+    let mounted = true;
+    getAdvisorProfile().then((profile) => {
+      if (mounted && profile) {
+        setAdvisorInfo(profile);
+      }
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [isOpen]);
+
+  // Save advisor info changes to local DexieDB
   const handleAdvisorChange = (e) => {
     const { name, value } = e.target;
     setAdvisorInfo((prev) => {
       const updated = { ...prev, [name]: value };
-      try {
-        if (typeof window !== "undefined" && window.localStorage) {
-          window.localStorage.setItem(ADVISOR_STORAGE_KEY, JSON.stringify(updated));
-        }
-      } catch {
-        // ignore localStorage errors
-      }
+      saveAdvisorProfile(updated).catch((err) =>
+        console.warn("Failed to save advisor profile:", err)
+      );
       return updated;
     });
+  };
+
+  // Save consultation to local DexieDB
+  const handleSaveConsultation = async () => {
+    setIsSaving(true);
+    try {
+      await saveConsultation({
+        clientName: formData.name,
+        clientEmail: formData.email,
+        agency: formData.agency,
+        formData,
+        calculations,
+      });
+      setStatusMessage("Estimate saved to device database!");
+      setTimeout(() => setStatusMessage(""), 3000);
+    } catch (err) {
+      console.error("Failed to save consultation:", err);
+      setStatusMessage("Error saving consultation");
+      setTimeout(() => setStatusMessage(""), 3000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getCleanPdfName = () => {
@@ -212,6 +234,18 @@ ${advisorInfo.phone}`;
             >
               {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
               <span>Email Proposal</span>
+            </button>
+
+            {/* Save to Local DexieDB */}
+            <button
+              type="button"
+              disabled={isSaving}
+              onClick={handleSaveConsultation}
+              className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-300 font-semibold rounded-lg transition-colors flex items-center gap-1.5 active:scale-95"
+              title="Save client calculation to offline database"
+            >
+              <BookmarkCheck size={15} />
+              <span className="hidden sm:inline">Save Record</span>
             </button>
 
             {/* Direct Download */}

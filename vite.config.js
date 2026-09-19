@@ -8,11 +8,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['apple-touch-icon.png', 'vite.svg'],
+      includeAssets: ['apple-touch-icon.png', 'vite.svg', 'pwa-192x192.png', 'pwa-512x512.png', 'CNAME'],
       manifest: {
         name: 'FRS Retirement Estimator',
         short_name: 'FRS Calc',
-        description: 'Offline FRS Pension and DROP Calculator',
+        description: 'Offline-First FRS Pension and DROP Calculator',
         start_url: '/',
         display: 'standalone',
         background_color: '#f8fafc',
@@ -30,6 +30,44 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
+          },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+        navigateFallback: '/index.html',
+        runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.destination === 'document' || request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'html-cache',
+              networkTimeoutSeconds: 2,
+            },
+          },
+          {
+            urlPattern: ({ request }) =>
+              request.destination === 'style' ||
+              request.destination === 'script' ||
+              request.destination === 'worker',
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'static-resources',
+            },
+          },
+          {
+            urlPattern: ({ request }) => request.destination === 'image',
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'image-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 30 * 24 * 60 * 60,
+              },
+            },
           },
         ],
       },

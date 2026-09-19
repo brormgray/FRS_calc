@@ -310,3 +310,17 @@ export function calculateFRSBenefits(formData, currentYear = new Date().getFullY
     safeSalary: annualSalary,
   };
 }
+
+/**
+ * Format a numeric dollar amount as USD ($X,XXX.XX)
+ * @param {number} value
+ * @returns {string}
+ */
+export function formatCurrency(value) {
+  const num = typeof value === 'number' ? value : parseFloat(value) || 0;
+  return '$' + num.toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
