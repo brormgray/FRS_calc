@@ -4,6 +4,7 @@ import OnePageReport from "./OnePageReport.jsx";
 import { generateReportPdfBlob, shareOrEmailReport, createMailtoUrl } from "../utils/pdfExport.js";
 import { DEFAULT_ADVISOR_INFO } from "../constants/pension.js";
 import { getAdvisorProfile, saveAdvisorProfile, saveConsultation } from "../db/index.js";
+import { formatPhoneNumber } from "../utils/calculations.js";
 
 export default function ReportModal({
   isOpen,
@@ -24,7 +25,10 @@ export default function ReportModal({
     let mounted = true;
     getAdvisorProfile().then((profile) => {
       if (mounted && profile) {
-        setAdvisorInfo(profile);
+        setAdvisorInfo({
+          ...profile,
+          phone: formatPhoneNumber(profile.phone || ""),
+        });
       }
     });
     return () => {
@@ -35,8 +39,9 @@ export default function ReportModal({
   // Save advisor info changes to local DexieDB
   const handleAdvisorChange = (e) => {
     const { name, value } = e.target;
+    const finalValue = name === "phone" ? formatPhoneNumber(value) : value;
     setAdvisorInfo((prev) => {
-      const updated = { ...prev, [name]: value };
+      const updated = { ...prev, [name]: finalValue };
       saveAdvisorProfile(updated).catch((err) =>
         console.warn("Failed to save advisor profile:", err)
       );
@@ -308,10 +313,11 @@ ${advisorInfo.phone}`;
               </label>
               <input
                 type="tel"
+                inputMode="numeric"
                 name="phone"
                 value={advisorInfo.phone}
                 onChange={handleAdvisorChange}
-                placeholder="e.g. (305) 555-0192"
+                placeholder="(Area Code) Phone - Number"
                 className="w-full px-2.5 py-1.5 bg-white border border-emerald-300 rounded focus:ring-1 focus:ring-emerald-500 outline-none text-xs"
               />
             </div>

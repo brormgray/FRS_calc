@@ -324,3 +324,29 @@ export function formatCurrency(value) {
   });
 }
 
+/**
+ * Automatically format a raw phone number input to '(Area Code) Phone - Number' e.g. (XXX) XXX-XXXX
+ * @param {string} value
+ * @returns {string}
+ */
+export function formatPhoneNumber(value) {
+  if (!value) return '';
+  // Strip all non-digit characters
+  const rawDigits = value.toString().replace(/\D/g, '');
+  if (!rawDigits) return '';
+
+  // If user enters leading 1 (11 digits), strip the 1 for standard 10-digit US format
+  const digits = rawDigits.length > 10 && rawDigits.startsWith('1')
+    ? rawDigits.slice(1, 11)
+    : rawDigits.slice(0, 10);
+
+  if (digits.length < 4) {
+    return `(${digits}`;
+  }
+  if (digits.length < 7) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  }
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+}
+
+

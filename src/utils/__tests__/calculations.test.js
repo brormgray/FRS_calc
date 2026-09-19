@@ -6,6 +6,8 @@ import {
   calculateOptionMultiplier,
   calculateDropLumpSum,
   calculateFRSBenefits,
+  formatCurrency,
+  formatPhoneNumber,
 } from "../calculations.js";
 import { INITIAL_FORM_STATE, FRS_THRESHOLDS } from "../../constants/pension.js";
 
@@ -304,6 +306,29 @@ describe("FRS Actuarial Calculations Engine", () => {
       expect(resOpt4.optionMultiplier).toBeCloseTo(0.932, 4);
       expect(resOpt4.monthlyPensionTaxable).toBeCloseTo(2400 * 0.932, 2);
       expect(resOpt4.survivorMonthlyPension).toBeCloseTo(resOpt4.monthlyPensionTaxable * (2 / 3), 2);
+    });
+  });
+
+  describe("Formatting Utilities", () => {
+    it("formats currency correctly into USD", () => {
+      expect(formatCurrency(0)).toBe("$0.00");
+      expect(formatCurrency(1234.5)).toBe("$1,234.50");
+      expect(formatCurrency("50000")).toBe("$50,000.00");
+    });
+
+    it("automatically formats phone numbers to '(Area Code) Phone - Number'", () => {
+      expect(formatPhoneNumber("")).toBe("");
+      expect(formatPhoneNumber(null)).toBe("");
+      expect(formatPhoneNumber("3")).toBe("(3");
+      expect(formatPhoneNumber("305")).toBe("(305");
+      expect(formatPhoneNumber("3055")).toBe("(305) 5");
+      expect(formatPhoneNumber("305555")).toBe("(305) 555");
+      expect(formatPhoneNumber("3055550192")).toBe("(305) 555-0192");
+      // Punctuation and raw formatting
+      expect(formatPhoneNumber("305-555-0192")).toBe("(305) 555-0192");
+      expect(formatPhoneNumber("(305) 555-0192")).toBe("(305) 555-0192");
+      // Leading 1 (11 digits)
+      expect(formatPhoneNumber("13055550192")).toBe("(305) 555-0192");
     });
   });
 });

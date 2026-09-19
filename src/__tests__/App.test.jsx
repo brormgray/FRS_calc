@@ -159,5 +159,31 @@ describe("App Integration Tests", () => {
     expect(screen.getByRole("button", { name: /Export Local Backup/i })).toBeDefined();
     expect(screen.getByRole("button", { name: /Restore Backup/i })).toBeDefined();
   });
+
+  it("automatically formats phone number to '(Area Code) Phone - Number' in advisor profile", () => {
+    render(<App />);
+
+    // Open report modal
+    const openReportBtn = screen.getByRole("button", { name: /1-Page Report & Email/i });
+    fireEvent.click(openReportBtn);
+
+    // Open advisor details drawer
+    const configDetailsBtn = screen.getByRole("button", { name: /Configure Your Details/i });
+    fireEvent.click(configDetailsBtn);
+
+    // Find phone input
+    const phoneInput = screen.getByPlaceholderText(/\(Area Code\) Phone - Number/i);
+    expect(phoneInput).toBeDefined();
+
+    // Type raw digits
+    fireEvent.change(phoneInput, { target: { name: "phone", value: "8135554920" } });
+    expect(phoneInput.value).toBe("(813) 555-4920");
+  });
+
+  it("renders the force update button in the footer below reset calculator", () => {
+    render(<App />);
+    const updateBtn = screen.getByRole("button", { name: /Check for Updates & Force Refresh/i });
+    expect(updateBtn).toBeDefined();
+  });
 });
 
