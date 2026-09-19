@@ -264,5 +264,46 @@ describe("FRS Actuarial Calculations Engine", () => {
       // Base monthly: 5000 * 26 * 0.016 * (1 - 0.20) = 5000 * 26 * 0.016 * 0.8 = 1664
       expect(res.monthlyPensionTaxable).toBeCloseTo(1664, 2);
     });
+
+    it("dynamically calculates spouse age difference and Option 3 & 4 survivor benefits from spouseAge", () => {
+      const baseFormData = {
+        name: "Test User",
+        hiredBeforeJuly2011: true,
+        jobClass: "Regular",
+        retireTiming: "Normal",
+        currentAge: 50,
+        yearsEmployed: 20,
+        annualSalary: 60000,
+        dropMonths: 0,
+        dropInterestRate: 4,
+        mortalityAge: 85,
+        selectedOption: 3,
+        spouseAge: 55, // 5 years older (+5)
+      };
+
+      // Member base monthly = 5000 * 30 * 0.016 = 2400
+      // Option 3 factor for +5 years = 0.90 + 5 * 0.005 = 0.925 (92.5%)
+      const resOlder = calculateFRSBenefits(baseFormData, 2026);
+      expect(resOlder.spouseAgeDiff).toBe(5);
+      expect(resOlder.optionMultiplier).toBeCloseTo(0.925, 4);
+      expect(resOlder.monthlyPensionTaxable).toBeCloseTo(2400 * 0.925, 2);
+      expect(resOlder.survivorMonthlyPension).toBeCloseTo(resOlder.monthlyPensionTaxable, 2); // 100% survivor
+
+      // Younger spouse: member 50, spouse 44 (-6 years)
+      // Option 3 factor for -6 years = 0.90 - 6 * 0.005 = 0.87 (87.0%)
+      const resYounger = calculateFRSBenefits({ ...baseFormData, spouseAge: 44 }, 2026);
+      expect(resYounger.spouseAgeDiff).toBe(-6);
+      expect(resYounger.optionMultiplier).toBeCloseTo(0.87, 4);
+      expect(resYounger.monthlyPensionTaxable).toBeCloseTo(2400 * 0.87, 2);
+      expect(resYounger.survivorMonthlyPension).toBeCloseTo(resYounger.monthlyPensionTaxable, 2);
+
+      // Option 4 (66 2/3% survivor) with younger spouse (-6 years)
+      // Option 4 factor for -6 years = 0.95 - 6 * 0.003 = 0.932 (93.2%)
+      const resOpt4 = calculateFRSBenefits({ ...baseFormData, selectedOption: 4, spouseAge: 44 }, 2026);
+      expect(resOpt4.spouseAgeDiff).toBe(-6);
+      expect(resOpt4.optionMultiplier).toBeCloseTo(0.932, 4);
+      expect(resOpt4.monthlyPensionTaxable).toBeCloseTo(2400 * 0.932, 2);
+      expect(resOpt4.survivorMonthlyPension).toBeCloseTo(resOpt4.monthlyPensionTaxable * (2 / 3), 2);
+    });
   });
 });

@@ -52,6 +52,36 @@ describe("App Integration Tests", () => {
     expect(screen.getByText(/10-Year Guarantee/i)).toBeDefined();
   });
 
+  it("calculates Option 3 dynamically when entering spouse age", () => {
+    render(<App />);
+
+    const ageInput = screen.getByPlaceholderText("e.g. 45");
+    const salaryInput = screen.getByPlaceholderText("e.g. 60000");
+    const yearsInput = screen.getByPlaceholderText("e.g. 15");
+
+    fireEvent.change(ageInput, { target: { name: "currentAge", value: "50" } });
+    fireEvent.change(salaryInput, { target: { name: "annualSalary", value: "60000" } });
+    fireEvent.change(yearsInput, { target: { name: "yearsEmployed", value: "20" } });
+
+    // Select Option 3 (100% Joint & Survivor)
+    const option3Btn = screen.getByRole("button", { name: /Option 3/i });
+    fireEvent.click(option3Btn);
+
+    // Spouse Age input should be rendered
+    const spouseAgeInput = screen.getByLabelText(/Spouse Age/i);
+    expect(spouseAgeInput).toBeDefined();
+
+    // Default when no spouse age is entered is same age (0 yrs diff -> 90.0% of Option 1: 2400 * 0.90 = $2,160.00)
+    expect(screen.getByText(/Same age as member \(0 yrs\)/i)).toBeDefined();
+    expect(screen.getByText("$2,160.00")).toBeDefined();
+
+    // Change spouse age to 45 (5 years younger -> -5 yrs -> 90% - 2.5% = 87.5% -> $2,100.00)
+    fireEvent.change(spouseAgeInput, { target: { name: "spouseAge", value: "45" } });
+    expect(screen.getByText(/5 yrs younger \(-5 yrs\)/i)).toBeDefined();
+    expect(screen.getByText(/87.5% of Option 1/i)).toBeDefined();
+    expect(screen.getByText("$2,100.00")).toBeDefined();
+  });
+
   it("opens reset modal and resets calculator to blank state on confirmation", () => {
     render(<App />);
 
@@ -83,4 +113,35 @@ describe("App Integration Tests", () => {
     expect(screen.getByText(/IVR Bypass:/i)).toBeDefined();
     expect(screen.getByText(/System prompts for SSN/i)).toBeDefined();
   });
+
+  it("captures employee identity and opens the 1-Page Report modal", () => {
+    render(<App />);
+
+    const nameInput = screen.getByPlaceholderText("e.g. Robert Davis");
+    const emailInput = screen.getByPlaceholderText("e.g. robert.davis@flschools.org");
+    const agencyInput = screen.getByPlaceholderText("e.g. Orange County Public Schools");
+
+    fireEvent.change(nameInput, { target: { name: "name", value: "Sarah Connor" } });
+    fireEvent.change(emailInput, { target: { name: "email", value: "sarah@flschools.org" } });
+    fireEvent.change(agencyInput, { target: { name: "agency", value: "Hillsborough County Schools" } });
+
+    expect(nameInput.value).toBe("Sarah Connor");
+    expect(emailInput.value).toBe("sarah@flschools.org");
+
+    // Click "1-Page Report & Email" button in the Header
+    const openReportBtn = screen.getByRole("button", { name: /1-Page Report & Email/i });
+    expect(openReportBtn).toBeDefined();
+    fireEvent.click(openReportBtn);
+
+    // Modal should be visible
+    expect(screen.getByText(/Export & Deliver 1-Page Proposal/i)).toBeDefined();
+    expect(screen.getAllByText(/Sarah Connor/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/sarah@flschools.org/i).length).toBeGreaterThanOrEqual(1);
+
+    // Look for Action buttons
+    expect(screen.getByRole("button", { name: /Email Proposal/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Download PDF/i })).toBeDefined();
+    expect(screen.getByRole("button", { name: /Print/i })).toBeDefined();
+  });
 });
+

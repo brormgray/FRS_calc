@@ -192,7 +192,14 @@ export function calculateFRSBenefits(formData, currentYear = new Date().getFullY
   const dropMonths = parseFloat(formData.dropMonths) || 0;
   const dropInterestRate = parseFloat(formData.dropInterestRate) || 0;
   const mortalityAge = parseFloat(formData.mortalityAge) || 0;
-  const spouseAgeDiff = parseFloat(formData.spouseAgeDiff) || 0;
+  
+  // Calculate spouse age difference dynamically from spouseAge if provided, otherwise fallback to spouseAgeDiff
+  let spouseAgeDiff = 0;
+  if (formData.spouseAge !== undefined && formData.spouseAge !== "" && currentAge > 0) {
+    spouseAgeDiff = (parseFloat(formData.spouseAge) || 0) - currentAge;
+  } else if (formData.spouseAgeDiff !== undefined && formData.spouseAgeDiff !== "") {
+    spouseAgeDiff = parseFloat(formData.spouseAgeDiff) || 0;
+  }
 
   // 1. Plan tier & boundary resolution
   const { isPre2011Plan, isBoundaryYear, hasServiceData } = determinePlanTier(
@@ -251,6 +258,14 @@ export function calculateFRSBenefits(formData, currentYear = new Date().getFullY
   const optionMultiplier = calculateOptionMultiplier(formData.selectedOption, spouseAgeDiff);
   const monthlyPensionTaxable = baseMonthlyPension * optionMultiplier;
 
+  // Survivor benefit calculation (Options 3 & 4)
+  let survivorMonthlyPension = 0;
+  if (parseInt(formData.selectedOption, 10) === 3) {
+    survivorMonthlyPension = monthlyPensionTaxable; // 100% Joint & Survivor
+  } else if (parseInt(formData.selectedOption, 10) === 4) {
+    survivorMonthlyPension = monthlyPensionTaxable * (2 / 3); // 66 2/3% Joint & Survivor
+  }
+
   // 8. D.R.O.P. lump sum
   const dropLumpSum = calculateDropLumpSum(
     monthlyPensionTaxable,
@@ -270,6 +285,10 @@ export function calculateFRSBenefits(formData, currentYear = new Date().getFullY
     isBoundaryYear,
     hasServiceData,
     monthlyPensionTaxable,
+    baseMonthlyPension,
+    optionMultiplier,
+    spouseAgeDiff,
+    survivorMonthlyPension,
     dropLumpSum,
     monthlyShortfall,
     annualShortfall,

@@ -85,27 +85,73 @@ export default function PensionCalculation({
             </div>
           )}
 
-          {/* Spouse Age Difference for Options 3 & 4 */}
+          {/* Spouse Age & Actuarial Impact for Options 3 & 4 */}
           {(formData.selectedOption === 3 || formData.selectedOption === 4) && (
-            <div className="p-4 bg-emerald-100/50 border-t border-emerald-200 flex flex-col md:flex-row items-center gap-4">
-              <div className="w-full md:w-1/2 space-y-1">
-                <label className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider">
-                  Spouse Age Difference
-                </label>
-                <input
-                  type="number"
-                  name="spouseAgeDiff"
-                  value={formData.spouseAgeDiff}
-                  onChange={onInputChange}
-                  className="w-full px-3 py-2 bg-white border border-emerald-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-mono text-center"
-                />
-              </div>
-              <div className="w-full md:w-1/2 text-sm text-emerald-800 font-medium">
-                {formData.spouseAgeDiff === 0 || formData.spouseAgeDiff === ""
-                  ? "Spouse is the exact same age"
-                  : parseFloat(formData.spouseAgeDiff) > 0
-                  ? `Spouse is ${formData.spouseAgeDiff} years older`
-                  : `Spouse is ${Math.abs(formData.spouseAgeDiff)} years younger`}
+            <div className="p-4 bg-emerald-50/70 border-t border-emerald-200 space-y-3">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="w-full md:w-52 space-y-1">
+                  <label htmlFor="spouseAge" className="text-[10px] font-bold text-emerald-900 uppercase tracking-wider block">
+                    Spouse Age
+                  </label>
+                  <input
+                    id="spouseAge"
+                    type="number"
+                    name="spouseAge"
+                    min="18"
+                    max="110"
+                    placeholder={formData.currentAge ? `e.g. ${formData.currentAge}` : "e.g. 50"}
+                    value={formData.spouseAge ?? ""}
+                    onChange={onInputChange}
+                    className="w-full px-3 py-2 bg-white border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-mono text-center text-sm font-semibold shadow-sm text-slate-800"
+                  />
+                  <span className="text-[10px] text-slate-500 block text-center">
+                    Joint Annuitant Age
+                  </span>
+                </div>
+
+                <div className="flex-1 w-full bg-white p-3.5 rounded-xl border border-emerald-200/80 text-xs text-slate-700 space-y-2 shadow-sm">
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                    <span className="font-semibold text-slate-700">Calculated Age Difference:</span>
+                    <span className="font-mono font-bold text-emerald-900 bg-emerald-100/70 px-2 py-0.5 rounded text-[11px]">
+                      {!formData.currentAge
+                        ? "Enter current age in Profile first"
+                        : formData.spouseAge === "" || formData.spouseAge === undefined
+                        ? "Same age as member (0 yrs)"
+                        : calculations.spouseAgeDiff === 0
+                        ? "Exact same age (0 yrs)"
+                        : calculations.spouseAgeDiff > 0
+                        ? `${calculations.spouseAgeDiff} yrs older (+${calculations.spouseAgeDiff} yrs)`
+                        : `${Math.abs(calculations.spouseAgeDiff)} yrs younger (-${Math.abs(calculations.spouseAgeDiff)} yrs)`}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
+                    <span className="font-semibold text-slate-700">
+                      Option {formData.selectedOption} Payout Factor:
+                    </span>
+                    <span className="font-mono font-bold text-emerald-700 text-xs">
+                      {((calculations.optionMultiplier || 1) * 100).toFixed(1)}% of Option 1
+                      {calculations.spouseAgeDiff !== 0 && formData.currentAge && (
+                        <span className="text-[10px] font-medium text-slate-500 ml-1.5">
+                          ({calculations.spouseAgeDiff > 0 ? "+" : ""}
+                          {(calculations.spouseAgeDiff * (formData.selectedOption === 3 ? 0.5 : 0.3)).toFixed(1)}% adj)
+                        </span>
+                      )}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] pt-0.5">
+                    <span className="text-slate-600 font-medium">
+                      Surviving Spouse Benefit ({formData.selectedOption === 3 ? "100%" : "66 2/3%"}):
+                    </span>
+                    <span className="font-mono font-bold text-slate-900">
+                      ${(calculations.survivorMonthlyPension || 0).toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })} / mo
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           )}

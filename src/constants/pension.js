@@ -36,6 +36,8 @@ export const PENSION_OPTIONS = {
 
 export const INITIAL_FORM_STATE = {
   name: "",
+  email: "",
+  agency: "",
   hiredBeforeJuly2011: true,
   jobClass: "Regular",
   retireTiming: "Normal",
@@ -46,7 +48,18 @@ export const INITIAL_FORM_STATE = {
   dropInterestRate: 4,
   mortalityAge: 85,
   selectedOption: 1,
+  spouseAge: "",
   spouseAgeDiff: 0,
+};
+
+export const ADVISOR_STORAGE_KEY = "frs_advisor_profile_v1";
+
+export const DEFAULT_ADVISOR_INFO = {
+  name: "",
+  email: "",
+  phone: "",
+  firm: "Florida Retirement Planning",
+  title: "FRS Pension Specialist",
 };
 
 /**

@@ -16,6 +16,59 @@ export default function EmployeeProfile({
           <User size={20} />
           <h2>Employee Profile</h2>
         </div>
+        {formData.name && (
+          <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+            {formData.name}
+          </span>
+        )}
+      </div>
+
+      {/* Employee Identity Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4 pb-4 border-b border-slate-100">
+        <div className="space-y-1">
+          <label htmlFor="employeeName" className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+            Employee Full Name
+          </label>
+          <input
+            id="employeeName"
+            type="text"
+            name="name"
+            value={formData.name || ""}
+            onChange={onInputChange}
+            placeholder="e.g. Robert Davis"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm placeholder:text-slate-300 font-medium"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="employeeEmail" className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+            Employee Email Address
+          </label>
+          <input
+            id="employeeEmail"
+            type="email"
+            name="email"
+            value={formData.email || ""}
+            onChange={onInputChange}
+            placeholder="e.g. robert.davis@flschools.org"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm placeholder:text-slate-300"
+          />
+        </div>
+
+        <div className="space-y-1">
+          <label htmlFor="employeeAgency" className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+            Employer / District / Agency
+          </label>
+          <input
+            id="employeeAgency"
+            type="text"
+            name="agency"
+            value={formData.agency || ""}
+            onChange={onInputChange}
+            placeholder="e.g. Orange County Public Schools"
+            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm placeholder:text-slate-300"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

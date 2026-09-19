@@ -9,6 +9,7 @@ import DropSection from './components/DropSection.jsx';
 import ShortfallSection from './components/ShortfallSection.jsx';
 import BuyoutSection from './components/BuyoutSection.jsx';
 import ResetModal from './components/ResetModal.jsx';
+import ReportModal from './components/ReportModal.jsx';
 import Footer from './components/Footer.jsx';
 
 export { PENSION_OPTIONS };
@@ -17,6 +18,7 @@ export default function App() {
   const [formData, setFormData] = useState(INITIAL_FORM_STATE);
   const [showOptionModal, setShowOptionModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
   const [showIvrDetails, setShowIvrDetails] = useState(false);
 
   // Actuarial calculation engine
@@ -71,11 +73,21 @@ export default function App() {
         onConfirm={handleReset}
       />
 
+      {/* 1-Page Executive Report & Delivery Modal */}
+      <ReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        formData={formData}
+        calculations={calculations}
+        onUpdateFormData={setFormData}
+      />
+
       <div className="max-w-5xl mx-auto space-y-6">
         {/* App Header */}
         <Header
           hasServiceData={calculations.hasServiceData}
           isPre2011Plan={calculations.isPre2011Plan}
+          onOpenReport={() => setShowReportModal(true)}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
